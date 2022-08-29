@@ -1,0 +1,44 @@
+--EX01 명시적 커서 사용
+--LOOP,. FOR LOOP 사용 
+SET SERVEROUTPUT ON;
+
+DECLARE
+    V_EMP_ROW EMP%ROWTYPE;
+    
+    CURSOR C1 IS 
+    SELECT * FROM EMP;
+
+BEGIN
+    OPEN C1;
+        LOOP 
+            FETCH C1 INTO V_EMP_ROW;
+            
+            EXIT WHEN C1%NOTFOUND;
+            DBMS_OUTPUT.PUT_LINE('EMPNO : ' || V_EMP_ROW.EMPNO ||
+                                                    ', ENAME : ' || V_EMP_ROW.ENAME ||
+                                                    ', JOB : ' || V_EMP_ROW.JOB ||
+                                                    ', SAL : ' || V_EMP_ROW.SAL||
+                                                    ', DEPTNO : ' || V_EMP_ROW.DEPTNO);
+        END LOOP;
+    CLOSE C1;
+END;
+/
+
+--EX02
+DECLARE
+    V_WRONG DATE;
+    
+BEGIN
+    SELECT ENAME INTO V_WRONG
+    FROM EMP
+    WHERE EMPNO=7369;
+    
+    DBMS_OUTPUT.PUT_LINE('예외가 발생하면 다음 문장은 실행되지 않습니다.');
+    
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('오류가 발생하였습니다. [' || SYSDATE || ']');
+        DBMS_OUTPUT.PUT_LINE('SQLCODE : ' || SQLCODE);
+        DBMS_OUTPUT.PUT_LINE('SQLERRM : ' || SQLERRM);
+END;
+/

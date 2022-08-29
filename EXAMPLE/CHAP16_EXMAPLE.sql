@@ -1,0 +1,25 @@
+SET SERVEROUTPUT ON;
+-- EX01 1부터 10까지  홀수 출력
+BEGIN
+    FOR i IN 1..9 LOOP
+        IF MOD(i, 2) = 1
+            THEN DBMS_OUTPUT.PUT_LINE(i);
+        END IF;
+     END LOOP;
+END;
+/
+
+-- EX02 
+DECLARE
+    V_DEPTNO DEPT.DEPTNO%TYPE;
+    V_DNAME DEPT.DNAME%TYPE;
+BEGIN
+    V_DEPTNO:=20;
+       IF V_DEPTNO IN(10, 20, 30, 40) THEN
+            SELECT DNAME INTO V_DNAME FROM DEPT WHERE DEPTNO=V_DEPTNO;
+            DBMS_OUTPUT.PUT_LINE('DNAME : ' || + V_DNAME);
+       ELSE
+           DBMS_OUTPUT.PUT_LINE('DNAME : N/A');
+        END IF;
+END;
+/

@@ -1,0 +1,152 @@
+CREATE TABLE STUDENT (
+   HAKBUN VARCHAR(8) PRIMARY KEY NOT NULL, --학번
+   NAME NVARCHAR2(20), --이름
+   HCODE CHAR(2), -- 학과코드
+   HPHONE VARCHAR(20), -- 연락처
+   JUMIN CHAR(14), -- 주민번호
+   DONGARI NVARCHAR2(20), -- 동아리 이름
+   JANGHAK NVARCHAR2(10) -- 장학금 수여 여부
+);
+
+INSERT INTO STUDENT VALUES('19913093', '김찬중',' 1', '011-111-1111', '780112-1234567', '영화', null);
+INSERT INTO STUDENT VALUES('19913094', '이호철', '2', '011-111-1112', '790112-2234567', '영화', '수상');
+INSERT INTO STUDENT VALUES('19913095', '김도형', '3', '011-111-1113', '800112-1234567', null, null);
+INSERT INTO STUDENT VALUES('20003094', '홍길동', '4', '011-111-1114', '800708-2234567', '탁구', '수상');
+INSERT INTO STUDENT VALUES('20001093', '김갑돌', '4', '011-111-1115', '810112-1234567', '영화', null);
+INSERT INTO STUDENT VALUES('20001094', '김갑순', '2', '011-111-1116', '000112-3234567', '테니스', null);
+
+-- 학과 테이블
+-- 1 경영학과, 2 컴퓨터 공학과, 3 수학과, 4 영문과, 5 DB 보안과
+
+CREATE TABLE HAKGA (
+    HCODE CHAR(1), --학과코드
+    HNAME NVARCHAR2(20) --학과 이름
+);
+
+INSERT INTO HAKGA VALUES('1', '경영학과');
+INSERT INTO HAKGA VALUES('2', '컴퓨터공학과');
+INSERT INTO HAKGA VALUES('3', '수학과');
+INSERT INTO HAKGA VALUES('4', '영문과');
+INSERT INTO HAKGA VALUES('5', 'DB보안과');
+
+CREATE TABLE SUNGJUK(
+HAKBUN VARCHAR2(8), --학번
+KOR NUMBER(3),
+MAT NUMBER(3),
+ENG NUMBER(3)
+);
+
+INSERT INTO SUNGJUK VALUES('19913093', 80, 90, 100);
+INSERT INTO SUNGJUK VALUES('19913094', 70, 55, 80);
+INSERT INTO SUNGJUK VALUES('19913095', 98, 90, 90);
+INSERT INTO SUNGJUK VALUES('20003094', 70, 90, 100);
+INSERT INTO SUNGJUK VALUES('19913093', 100, 95, 100);
+INSERT INTO SUNGJUK VALUES('20001093', 99, 78, 100);
+INSERT INTO SUNGJUK VALUES('20001094', NULL, NULL, NULL);
+
+SELECT * FROM SUNGJUK;
+--1. 장학금을 한번도 받은적이 없는 학생을 검색
+SELECT * FROM STUDENT WHERE JANGHAK IS NULL;
+
+--2. 취미가 있는 학생들의 목록을 검색(동아리)
+SELECT * FROM STUDENT WHERE DONGARI IS NOT NULL;
+
+--3. 최근의 학번 순으로 정렬. 학번 이름 주민번호
+SELECT HAKBUN AS "학번", NAME AS "이름", JUMIN AS "주민번호"
+ FROM STUDENT 
+ ORDER BY HAKBUN DESC;
+ 
+--4. 주민번호로 성별을 나타내세요
+-- 학번 이름 주민번호 성별
+SELECT HAKBUN AS "학번", NAME AS "이름", JUMIN AS "주민번호",
+    CASE
+    WHEN SUBSTR (JUMIN,8,1) = 1 THEN '남자'
+    WHEN SUBSTR (JUMIN,8,1) = 3 THEN '남자'
+    ELSE '여자'
+    END AS "성별"
+    FROM STUDENT;
+    
+--5. 2000년대 학번의 학생들의 모든 정보를 검색하세요
+SELECT * FROM STUDENT
+WHERE HAKBUN>=20000000;
+
+--6. 주민번호를 이용하여 현재의 나이를 구하세요
+SELECT NAME,
+     CASE
+        WHEN SUBSTR (JUMIN, 1, 2)>50 
+            THEN 22+(100-SUBSTR(JUMIN, 1, 2))+1
+        WHEN SUBSTR(JUMIN, 1, 2)<50
+            THEN 22-SUBSTR(JUMIN, 1, 2)+1
+    END AS "나이"
+FROM STUDENT;
+
+--7. 서브 쿼리를 이용해서 동아리가 '영화' 동아리만 검색하세요
+SELECT *
+FROM(SELECT DONGARI FROM STUDENT WHERE DONGARI = '영화');
+
+--8. 70년대 태어난 사람을 모두 검색하세요
+SELECT * 
+FROM STUDENT
+WHERE SUBSTR(JUMIN, 1, 2) BETWEEN 70 AND 79;
+
+--9. 학번, 이름, 학과를 검색
+SELECT S.HAKBUN AS "학번" , S.NAME AS "이름", H.HNAME AS "학과"
+    FROM STUDENT S
+    LEFT OUTER JOIN HAKGA H
+        ON S.HCODE = H.HCODE;
+        
+--10. 학번, 이름, 학과, 국어점수, 수학점수, 영어점수를 나타내도록 검색하세요
+SELECT S.HAKBUN "학번", S.NAME "이름",H.HNAME "학과", SJ.MAT "수학점수", SJ.KOR "국어점수", SJ.ENG "영어점수"
+    FROM STUDENT S
+    LEFT OUTER JOIN HAKGA H
+        ON S.HCODE=H.HCODE
+    LEFT OUTER JOIN SUNGJUK SJ
+        ON S.HAKBUN=SJ.HAKBUN;
+        
+--11. 10번의 결과를 SUNGJUK2에 복사 하세요
+CREATE TABLE SUNGJUK2 AS
+(SELECT S.HAKBUN, S.NAME, SJ.ENG, SJ.MAT, SJ.KOR
+    FROM STUDENT S
+    INNER JOIN SUNGJUK SJ
+    ON S.HAKBUN=SJ.HAKBUN);
+
+--12. 학번, 이름, 학과, 국어점수, 수학점수, 영어점수를 나타내도록 검색하세요
+SELECT S.HAKBUN "학번", S.NAME "이름", H.HNAME "학과", SJ.KOR "국어점수", SJ.ENG, SJ.MAT
+    FROM STUDENT S
+        LEFT OUTER JOIN HAKGA H
+            ON S.HCODE = H.HCODE
+        LEFT OUTER JOIN SUNGJUK SJ
+            ON S.HAKBUN = SJ.HAKBUN;
+            
+
+--13. SUNGJUK2테이블을 이용해 과목의 총점과 평균을 구하세요
+SELECT NAME, ENG+MAT+KOR "과목 총점", ROUND((ENG+MAT+KOR)/3) "평균"
+FROM SUNGJUK2;
+
+--14. SUNGJUK2를 이용해서 과목별 총점과 전과목의 총점을 구하세요
+SELECT SUM(ENG) "영어총점", SUM(MAT) "수학총점", SUM(KOR) "국어총점", 
+            SUM(ENG) + SUM(MAT) + SUM(KOR) AS "전과목 총점"
+    FROM SUNGJUK2;
+
+--15. 과목명별로 각 과목의 합계를 구하세요
+SELECT SUM(ENG) "영어총점", SUM(MAT) "수학총점", SUM(KOR) "국어총점"  FROM SUNGJUK;
+
+--16. 국어 점수가 100점 이상인 이름을 검색하세요
+SELECT NAME
+    FROM SUNGJUK2
+    WHERE KOR>=100;
+
+--17. 영어 점수가 100점 이상인 이름과 학번을 검색하세요
+SELECT NAME, HAKBUN
+    FROM SUNGJUK2
+    WHERE ENG>=100;
+
+--18. SUNGJUK2 테이블의 행의 개수를 구하세요
+SELECT COUNT(*) FROM SUNGJUK2;
+
+--19. SUNGJUK2 테이블에서 국어 전체평균보다 높은 점수를 가진 사람의 학번과 이름을 검색하세요
+SELECT S.HAKBUN, S.NAME, SJ.KOR
+    FROM STUDENT S
+        JOIN SUNGJUK SJ
+        ON S.HAKBUN = SJ.HAKBUN
+        WHERE SJ.KOR > (SELECT AVG(KOR) FROM SUNGJUK);
