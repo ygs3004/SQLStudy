@@ -36,7 +36,6 @@ SELECT NO AS GB
   FROM t, (SELECT @ROWNUM:=0) B
  ORDER BY `3`;
 -- 알리아스를 기준으로 참조할때는 백틱을 이용해야 한다. 
- 
 
 	 
 	
