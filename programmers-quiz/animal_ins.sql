@@ -2,7 +2,8 @@
 https://school.programmers.co.kr/learn/courses/30/lessons/59405
 문제 설명
 ANIMAL_INS 테이블은 동물 보호소에 들어온 동물의 정보를 담은 테이블입니다. ANIMAL_INS 테이블 구조는 다음과 같으며, 
-ANIMAL_ID, ANIMAL_TYPE, DATETIME, INTAKE_CONDITION, NAME, SEX_UPON_INTAKE는 각각 동물의 아이디, 생물 종, 보호 시작일, 보호 시작 시 상태, 이름, 성별 및 중성화 여부를 나타냅니다.
+ANIMAL_ID, ANIMAL_TYPE, DATETIME, INTAKE_CONDITION, NAME, SEX_UPON_INTAKE는 
+각각 동물의 아이디, 생물 종, 보호 시작일, 보호 시작 시 상태, 이름, 성별 및 중성화 여부를 나타냅니다.
 
 NAME  TYPE  NULLABLE
 ANIMAL_ID VARCHAR(N)  FALSE
@@ -69,13 +70,20 @@ INSERT INTO ANIMAL_INS (ANIMAL_ID, ANIMAL_TYPE, `DATETIME`, INTAKE_CONDITION, NA
    
 INSERT INTO ANIMAL_INS (ANIMAL_ID, ANIMAL_TYPE, `DATETIME`, INTAKE_CONDITION, NAME, SEX_UPON_INTAKE)
      VALUES ('A368930', 'Dog', '2014-06-08 13:20:00', 'Normal', NULL, 'Spayed Female');  
+   
+INSERT INTO ANIMAL_INS (ANIMAL_ID, ANIMAL_TYPE, `DATETIME`, INTAKE_CONDITION, NAME, SEX_UPON_INTAKE)
+     VALUES ('A349996', 'Cat', '2018-01-22 14:32:00', 'Normal', 'Sugar Neutered Male');     
+    
+INSERT INTO ANIMAL_INS (ANIMAL_ID, ANIMAL_TYPE, `DATETIME`, INTAKE_CONDITION, NAME, SEX_UPON_INTAKE)
+     VALUES ('A396810', 'Dog', '2016-08-22 16:13:00', 'Injured', 'Raven', 'Spayed Female');        
+   
+INSERT INTO ANIMAL_INS (ANIMAL_ID, ANIMAL_TYPE, `DATETIME`, INTAKE_CONDITION, NAME, SEX_UPON_INTAKE)
+     VALUES ('A410668', 'Cat', '2015-11-19 13:41:00', 'Normal', 'Raven', 'Spayed Female');    
 
--- 풀이
 -- 동물 보호소에 가장 먼저 들어온 동물의 이름을 조회하는 SQL 문을 작성해주세요.
 SELECT NAME FROM ANIMAL_INS ORDER BY `DATETIME` LIMIT 1;
    
 -- 동물 보호소에 들어온 동물 중 젊은 동물1(INTAKE_CONDITION이 Aged가 아닌 경우를 뜻함↩)의 아이디와 이름을 조회하는 SQL 문을 작성해주세요. 이때 결과는 아이디 순으로 조회해주세요.
--- 풀이
 SELECT ANIMAL_ID
       ,NAME
   FROM ANIMAL_INS
@@ -83,13 +91,11 @@ SELECT ANIMAL_ID
  ORDER BY ANIMAL_ID;
 
 -- 동물 보호소에 들어온 모든 동물의 아이디와 이름을 ANIMAL_ID순으로 조회하는 SQL문을 작성해주세요. SQL을 실행하면 다음과 같이 출력되어야 합니다.
--- 풀이
 SELECT ANIMAL_ID, NAME 
   FROM ANIMAL_INS 
  ORDER BY ANIMAL_ID; 
  
 -- 동물 보호소에 들어온 동물 중, 이름이 있는 동물의 ID를 조회하는 SQL 문을 작성해주세요. 단, ID는 오름차순 정렬되어야 합니다.
--- 풀이
 SELECT ANIMAL_ID
   FROM ANIMAL_INS
  WHERE NAME IS NOT NULL
@@ -97,9 +103,25 @@ SELECT ANIMAL_ID
  
 -- 입양 게시판에 동물 정보를 게시하려 합니다. 동물의 생물 종, 이름, 성별 및 중성화 여부를 아이디 순으로 조회하는 SQL문을 작성해주세요.
 -- 이때 프로그래밍을 모르는 사람들은 NULL이라는 기호를 모르기 때문에, 이름이 없는 동물의 이름은 "No name"으로 표시해 주세요.
--- 풀이
 SELECT ANIMAL_TYPE, IFNULL(NAME, 'No name'), SEX_UPON_INTAKE
   FROM ANIMAL_INS
  ORDER BY ANIMAL_ID;
    
-   
+-- 동물 보호소에 동물이 몇 마리 들어왔는지 조회하는 SQL 문을 작성해주세요.
+SELECT COUNT(*) 
+  FROM ANIMAL_INS;
+
+-- 동물 보호소에 들어온 모든 동물의 아이디와 이름, 보호 시작일을 이름 순으로 조회하는 SQL문을 작성해주세요. 
+-- 단, 이름이 같은 동물 중에서는 보호를 나중에 시작한 동물을 먼저 보여줘야 합니다.
+SELECT ANIMAL_ID, NAME, DATETIME
+  FROM ANIMAL_INS
+ ORDER BY NAME, DATETIME DESC;
+ 
+-- 동물 보호소에 가장 먼저 들어온 동물은 언제 들어왔는지 조회하는 SQL 문을 작성해주세요.
+SELECT MIN(DATETIME)
+  FROM ANIMAL_INS;
+  
+-- 동물 보호소에 들어온 동물의 이름은 몇 개인지 조회하는 SQL 문을 작성해주세요. 이때 이름이 NULL인 경우는 집계하지 않으며 중복되는 이름은 하나로 칩니다.
+SELECT COUNT(DISTINCT NAME)
+  FROM ANIMAL_INS
+ WHERE NAME IS NOT NULL;
