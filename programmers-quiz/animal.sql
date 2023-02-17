@@ -294,4 +294,23 @@ SELECT AO.ANIMAL_ID AS ANIMAL_ID
  WHERE AI.DATETIME > AO.DATETIME
  ORDER BY AI.DATETIME;
  
+-- 동물 보호소에 들어온 동물 중 이름이 Lucy, Ella, Pickle, Rogan, Sabrina, Mitty인 
+-- 동물의 아이디와 이름, 성별 및 중성화 여부를 조회하는 SQL 문을 작성해주세요.
+SELECT ANIMAL_ID
+     , NAME
+     , SEX_UPON_INTAKE
+  FROM ANIMAL_INS
+ WHERE NAME IN('Lucy', 'Ella', 'Pickle', 'Rogan', 'Sabrina', 'Mitty');
  
+-- 동물 보호소에 들어온 모든 동물의 정보를 ANIMAL_ID순으로 조회하는 SQL문을 작성해주세요. 
+SELECT *
+  FROM ANIMAL_INS 
+ ORDER BY ANIMAL_ID;
+ 
+-- 천재지변으로 인해 일부 데이터가 유실되었습니다. 입양을 간 기록은 있는데, 보호소에 들어온 기록이 없는 동물의 ID와 이름을 ID 순으로 조회하는 SQL문을 작성해주세요.
+SELECT AO.ANIMAL_ID  
+     , AO.NAME
+  FROM ANIMAL_OUTS AO
+  LEFT JOIN ANIMAL_INS AI ON AO.ANIMAL_ID = AI.ANIMAL_ID
+ WHERE AI.ANIMAL_ID IS NULL
+ ORDER BY ANIMAL_ID;
