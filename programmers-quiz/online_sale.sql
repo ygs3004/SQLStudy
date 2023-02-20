@@ -39,3 +39,18 @@ SELECT USER_ID
  GROUP BY USER_ID, PRODUCT_ID
 HAVING COUNT(USER_ID)>1
  ORDER BY USER_ID, PRODUCT_ID DESC;
+
+-- USER_INFO 테이블과 ONLINE_SALE 테이블에서 년, 월, 성별 별로 상품을 구매한 회원수를 집계하는 SQL문을 작성해주세요. 
+-- 결과는 년, 월, 성별을 기준으로 오름차순 정렬해주세요. 이때, 성별 정보가 없는 경우 결과에서 제외해주세요.
+SELECT DATE_FORMAT(OS.SALES_DATE, '%Y') YEAR
+     , CONVERT(DATE_FORMAT(OS.SALES_DATE, '%c'), SIGNED INTEGER) MONTH
+     , UI.GENDER
+     , COUNT(DISTINCT OS.USER_ID) USERS
+  FROM ONLINE_SALE OS
+  JOIN USER_INFO UI ON OS.USER_ID = UI.USER_ID
+ WHERE UI.GENDER IS NOT NULL
+ GROUP BY YEAR, MONTH, UI.GENDER
+ ORDER BY YEAR, MONTH, UI.GENDER;
+ 
+-- DATE_FORMAT(OS.SALES_DATE, '%c') 을 사용할 경우 1,2,3 ---- 11, 12 로 표현된 월이 문자열로 비교되어 1, 11, 12, 2, 3 형태로 
+-- 정렬되기때문에 CONVERT 함수를 이용하거나, MONTH() 등의 함수로 값을 정렬 시켜야한다.

@@ -34,3 +34,4 @@ SELECT *
                     GROUP BY HOST_ID
                    HAVING COUNT(*) > 1)
  ORDER BY ID;
+ 
