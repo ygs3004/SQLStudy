@@ -317,3 +317,35 @@ SELECT DATETIME
   FROM ANIMAL_INS
  ORDER BY DATETIME DESC
  LIMIT 1; 
+ 
+-- 보호소에서는 몇 시에 입양이 가장 활발하게 일어나는지 알아보려 합니다. 0시부터 23시까지, 
+-- 각 시간대별로 입양이 몇 건이나 발생했는지 조회하는 SQL문을 작성해주세요. 이때 결과는 시간대 순으로 정렬해야 합니다.
+SELECT T.HOUR
+     , IFNULL(CT.COUNT, 0)
+  FROM (SELECT @ROWNUM := @ROWNUM+1 AS HOUR
+          FROM (SELECT @ROWNUM := -1) R, ANIMAL_OUTS
+         LIMIT 24) T
+  LEFT JOIN (SELECT HOUR(DATETIME) HOUR
+             , COUNT(HOUR(`DATETIME`)) COUNT
+          FROM ANIMAL_OUTS
+         GROUP BY HOUR(`DATETIME`)) CT
+    ON T.HOUR = CT.HOUR;
+-- T 테이블의 ROW가 24개 이상일때만 시간이 모두 나오는 문제가 있지만 프로그래머스 기준 통과  
+-- 프로그래머스 질문방 쿼리(재귀 테이블 이용) : RECURSIVE 이용하여 자신을 참조하는 테이블 생성
+WITH RECURSIVE TIME AS (
+    SELECT 0 AS HOUR
+    UNION ALL
+    SELECT HOUR+1 FROM TIME WHERE HOUR < 23
+) 
+SELECT T.HOUR
+     , IFNULL(CT.COUNT, 0)
+  FROM TIME T
+  LEFT JOIN (SELECT HOUR(DATETIME) HOUR
+                  , COUNT(HOUR(`DATETIME`)) COUNT
+               FROM ANIMAL_OUTS
+              GROUP BY HOUR(`DATETIME`)) CT
+    ON T.HOUR = CT.HOUR;
+
+
+
+ 
