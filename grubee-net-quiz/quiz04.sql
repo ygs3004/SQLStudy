@@ -59,22 +59,101 @@ GR_I        SEQ PATH
 <표 2>의 결과는 서로 연결되어 있는 파이프끼리 동일한 그룹ID(GR_ID)를 부여하고, 연결된 순서(SEQ)를 표시하고, 마지막으로 연결경로(PATH)를 순차적으로 보여주는 것입니다.
 */
 
-SELECT ID, CONCAT(S_X, S_Y, S_Z) START, CONCAT(E_X, E_Y, E_Z) END
-  FROM t4;
-  
+WITH RECURSIVE PIPE AS (
+  SELECT 1 AS LEVEL, A.ID S_ID, B.ID E_ID
+    FROM t4 A
+    JOIN t4 B ON B.S_X = A.E_X
+             AND B.S_Y = A.E_Y
+             AND B.S_Z = A.E_Z
+  UNION ALL
+  SELECT B.LEVEL+1, B.E_ID, A.E_ID
+    FROM (SELECT A.ID S_ID, B.ID E_ID FROM t4 A
+            JOIN t4 B ON B.S_X = A.E_X
+                     AND B.S_Y = A.E_Y
+                     AND B.S_Z = A.E_Z) A
+  JOIN PIPE AS B ON A.S_ID = B.E_ID
+)
+SELECT MAX(S_ID), MAX(E_ID)
+  FROM PIPE
+ GROUP BY S_ID;
+ ORDER BY LEVEL;
 
-SELECT CONNECT_BY_ROOT(id) gr_id
-     , LEVEL seq
-     , SUBSTR(SYS_CONNECT_BY_PATH(id, '-'), 2) path
-  FROM t4 a
- START WITH NOT EXISTS (SELECT 1
-                          FROM t4
-                         WHERE e_x = a.s_x
-                           AND e_y = a.s_y
-                           AND e_z = a.s_z
-                        )
- CONNECT BY PRIOR e_x = s_x
-        AND PRIOR e_y = s_y
-        AND PRIOR e_z = s_z
- ORDER SIBLINGS BY id
-;
+CREATE TABLE LINE AS 
+WITH PIPE AS (SELECT A.ID S, B.ID E
+                FROM t4 A
+                JOIN t4 B ON B.S_X = A.E_X
+                         AND B.S_Y = A.E_Y
+                         AND B.S_Z = A.E_Z)
+ , CONNECT AS (SELECT A.S AS `A`, A.E AS `B`, B.E AS `C`, C.E AS `D`, D.E `E`, E.E `F`, F.E `G`
+                FROM PIPE A
+                LEFT JOIN PIPE B ON A.E = B.S
+                LEFT JOIN PIPE C ON B.E = C.S
+                LEFT JOIN PIPE D ON C.E = D.S
+                LEFT JOIN PIPE E ON D.E = E.S
+                LEFT JOIN PIPE F ON E.E = F.S)
+  , LINE AS (SELECT *
+                  FROM CONNECT C
+                 WHERE NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.F = C2.G)
+                   AND NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.E = C2.G)
+                   AND NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.D = C2.G)
+                   AND NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.C = C2.G)
+                   AND NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.B = C2.G)
+                   AND NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.A = C2.G)
+                   AND NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.E = C2.F)
+                   AND NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.D = C2.F)
+                   AND NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.C = C2.F)
+                   AND NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.B = C2.F)
+                   AND NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.A = C2.F)
+                   AND NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.D = C2.E)
+                   AND NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.C = C2.E)
+                   AND NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.B = C2.E)
+                 ORDER BY A) SELECT * FROM LINE;
+
+SELECT A GR_I
+     , 1 AS SEQ
+     , A PATH
+  FROM LINE
+ UNION ALL
+SELECT A GR_I
+     , 2
+     , CONCAT(A, '-', B)
+  FROM LINE
+ WHERE B IS NOT NULL
+ UNION ALL
+SELECT A GR_I
+     , 3
+     , CONCAT(A, '-', B, '-', C)
+  FROM LINE
+ WHERE C IS NOT NULL
+ UNION ALL
+SELECT A GR_I
+     , 4
+     , CONCAT(A, '-', B, '-', C, '-', D)
+  FROM LINE
+ WHERE D IS NOT NULL
+ UNION ALL
+SELECT A GR_I
+     , 5
+     , CONCAT(A, '-', B, '-', C, '-', D, '-', E)
+  FROM LINE
+ WHERE E IS NOT NULL
+ UNION ALL
+SELECT A GR_I
+     , 6
+     , CONCAT(A, '-', B, '-', C, '-', D, '-', E, '-', F)
+  FROM LINE
+ WHERE F IS NOT NULL
+ UNION ALL
+SELECT A GR_I
+     , 7
+     , CONCAT(A, '-', B, '-', C, '-', D, '-', E, '-', F, '-', G)
+  FROM LINE
+ WHERE G IS NOT NULL
+ ORDER BY GR_I, PATH;
+ 
+ 
+ 
+ 
+
+   
+  
