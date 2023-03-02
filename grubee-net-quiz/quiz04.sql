@@ -90,7 +90,7 @@ WITH PIPE AS (SELECT A.ID S, B.ID E
                 LEFT JOIN PIPE C ON B.E = C.S
                 LEFT JOIN PIPE D ON C.E = D.S
                 LEFT JOIN PIPE E ON D.E = E.S
-                LEFT JOIN PIPE F ON E.E = F.S)
+                LEFT JOIN PIPE F ON E.E = F.S) SELECT * FROM PIPE;
   , LINE AS (SELECT *
                   FROM CONNECT C
                  WHERE NOT EXISTS (SELECT 1 FROM CONNECT C2 WHERE C.F = C2.G)
@@ -151,9 +151,3 @@ SELECT A GR_I
  WHERE G IS NOT NULL
  ORDER BY GR_I, PATH;
  
- 
- 
- 
-
-   
-  
